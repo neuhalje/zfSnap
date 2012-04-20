@@ -4,6 +4,7 @@
 : ${xPERIODICx_synczfs_root=""}
 : ${xPERIODICx_synczfs_user="backup"}
 
+
 # xPERIODICx_synczfs_servers:
 #		space separated list of server names (resolvable)
 #
@@ -44,7 +45,44 @@ fi
 echo "Synchronizing ZFS snapshots:"
 
 unwind=`readlink -nf N $0`
-. `dirname $unwind`/funcs
+
+
+# checknumber var
+#	Test $1 variable, and warn if not set to unsigned number.
+#	Return 0 if it's not a number, nonzero otherwise.
+
+checknumber() {
+	eval _value=\$${1}
+	debug "checknumber: $1 is set to $_value."
+
+	case $_value in
+	*[!0-9]*)
+		warn "$1 is not set properly."
+		return 0
+		;;
+	*)
+		return 1
+	esac
+}
+
+# checknotempty var
+#	Test $1 variable and warn if it doesn't contain anything.
+#	Return 0 if it has no data, nonzero otherwise.
+
+checknotempty() {
+	eval _value=\$${1}
+	debug "checknotempty: $1 is set to $_value."
+
+	if [ -z "$_value" ]; then
+		warn "$1 is not set properly."
+		return 0
+	else
+		return 1
+	fi
+}
+
+
+
 
 if checkyesno xPERIODICx_synczfs_enable; then
 	checknotempty xPERIODICx_synczfs_servers && exit 2
